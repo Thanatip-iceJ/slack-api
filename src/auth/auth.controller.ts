@@ -7,10 +7,12 @@ import {
   Req,
   Request,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Prisma } from '@prisma/client';
 import { AuthGuard } from './auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('auth')
 export class AuthController {
@@ -33,8 +35,13 @@ export class AuthController {
   }
 
   @UseGuards(AuthGuard)
+  @UseInterceptors(FileInterceptor('img'))
   @Patch()
-  editProfile(@Req() req, @Body() data: Prisma.UserUpdateInput) {
-    return this.authService.updateUser(req, data);
+  editProfile(
+    @Req() req,
+    @Body() data: Prisma.UserUpdateInput,
+    file: Express.Multer.File,
+  ) {
+    return this.authService.updateUser(req, data, file);
   }
 }

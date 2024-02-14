@@ -1,18 +1,22 @@
 import {
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { User, Prisma } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import * as fs from 'fs/promises';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwt: JwtService,
+    private cloudinary: CloudinaryService,
   ) {}
 
   async createUser(data: Prisma.UserCreateInput): Promise<User> {
@@ -69,11 +73,21 @@ export class AuthService {
     }
   }
 
-  async updateUser(req, data): Promise<User> {
+  async updateUser(req, data, file): Promise<User> {
     try {
+      console.log('REQQQ', req.file);
+      console.log('FILEEE', file);
       const foundUser = await this.prisma.user.findUnique({
         where: { id: req.user.userId },
       });
+      if (!foundUser) {
+        throw new NotFoundException("User doesn't exist...");
+      }
+      if (req.file) {
+        const img = await this.cloudinary.uploadImage(req.file.path);
+        console.log(img);
+        data.img = img['url'];
+      }
       Object.assign(foundUser, data);
       const user = await this.prisma.user.update({
         data: foundUser,
@@ -83,6 +97,10 @@ export class AuthService {
     } catch (err) {
       console.log(err);
       throw new InternalServerErrorException();
+    } finally {
+      if (req.file) {
+        await fs.unlink(req.file.path);
+      }
     }
   }
 }
