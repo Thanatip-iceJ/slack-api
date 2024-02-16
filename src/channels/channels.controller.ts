@@ -1,15 +1,25 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Delete,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { ChannelsService } from './channels.service';
-import { CreateChannelDto } from './dto/create-channel.dto';
-import { UpdateChannelDto } from './dto/update-channel.dto';
+import { ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from 'src/auth/auth.guard';
 
+@ApiTags('Channels')
 @Controller('channels')
 export class ChannelsController {
   constructor(private readonly channelsService: ChannelsService) {}
 
-  @Post()
-  create(@Body() createChannelDto: CreateChannelDto) {
-    return this.channelsService.create(createChannelDto);
+  @UseGuards(AuthGuard)
+  @Post(':roomId')
+  create(@Req() req) {
+    return this.channelsService.createChannel(req);
   }
 
   @Get()
@@ -20,11 +30,6 @@ export class ChannelsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.channelsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateChannelDto: UpdateChannelDto) {
-    return this.channelsService.update(+id, updateChannelDto);
   }
 
   @Delete(':id')

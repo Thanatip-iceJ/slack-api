@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Req, Post, Body } from '@nestjs/common';
+import { Controller, Get, UseGuards, Req } from '@nestjs/common';
 import { ChatroomsService } from './chatrooms.service';
 // import { CreateChatroomDto } from './dto/create-chatroom.dto';
 // import { UpdateChatroomDto } from './dto/update-chatroom.dto';
@@ -27,31 +27,4 @@ export class ChatroomsController {
   async getChannelMessages(@Req() req) {
     return this.chatroomsService.findAllChannelMsg(req);
   }
-  //   @Post()
-  //   create(@Req() req) {
-  //     return this.chatroomsService.create(req);
-  //   }
-
-  //   @Get()
-  //   findAll() {
-  //     return this.chatroomsService.findAll();
-  //   }
-
-  //   @Get(':id')
-  //   findOne(@Param('id') id: string) {
-  //     return this.chatroomsService.findOne(+id);
-  //   }
-
-  //   @Patch(':id')
-  //   update(
-  //     @Param('id') id: string,
-  //     @Body() updateChatroomDto: UpdateChatroomDto,
-  //   ) {
-  //     return this.chatroomsService.update(+id, updateChatroomDto);
-  //   }
-
-  //   @Delete(':id')
-  //   remove(@Param('id') id: string) {
-  //     return this.chatroomsService.remove(+id);
-  //   }
 }

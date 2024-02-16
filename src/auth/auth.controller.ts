@@ -13,7 +13,9 @@ import { AuthService } from './auth.service';
 import { Prisma } from '@prisma/client';
 import { AuthGuard } from './auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}

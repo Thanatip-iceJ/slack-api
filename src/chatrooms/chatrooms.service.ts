@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ChannelMessage } from '@prisma/client';
 // import { CreateChatroomDto } from './dto/create-chatroom.dto';
 // import { UpdateChatroomDto } from './dto/update-chatroom.dto';
@@ -48,21 +44,24 @@ export class ChatroomsService {
           },
         },
       },
-      include: { Channels: true },
+      include: {
+        ChatroomMember: true,
+        Channels: { include: { ChannelMembers: true } },
+      },
     });
     return rooms;
   }
 
-  async getAuthRooms(req) {
-    const { userId } = req.user;
-    const rooms = await this.prisma.chatroom.findMany({
-      include: { ChatroomMember: userId },
-    });
-    const channels = await this.prisma.channel.findMany({
-      include: { ChannelMember: userId },
-    });
-    return { rooms, channels };
-  }
+  // async getAuthRooms(req) {
+  //   const { userId } = req.user;
+  //   const rooms = await this.prisma.chatroom.findMany({
+  //     include: { ChatroomMember: true },
+  //   });
+  //   const channels = await this.prisma.channel.findMany({
+  //     include: { ChannelMember: true },
+  //   });
+  //   return { rooms, channels };
+  // }
   async createChannelMessage(
     message: string,
     userId: number,
@@ -80,7 +79,6 @@ export class ChatroomsService {
   }
 
   async findAllChannelMsg({
-    userId,
     channelId,
   }: {
     userId: number;
@@ -101,7 +99,6 @@ export class ChatroomsService {
       // if (!isMember) {
       //   throw new UnauthorizedException("You're not a member of this channel.");
       // }
-      console.log(channelId);
       const res = await this.prisma.channelMessage.findMany({
         where: {
           channelId: +channelId,
@@ -112,7 +109,7 @@ export class ChatroomsService {
           createdAt: 'asc',
         },
       });
-      // console.log(res);
+      console.log(res);
       return res;
     } catch (err) {
       console.log(err);

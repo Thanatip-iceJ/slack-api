@@ -1,11 +1,39 @@
-import { Injectable } from '@nestjs/common';
-import { CreateChannelDto } from './dto/create-channel.dto';
-import { UpdateChannelDto } from './dto/update-channel.dto';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class ChannelsService {
-  create(createChannelDto: CreateChannelDto) {
-    return 'This action adds a new channel';
+  constructor(private prisma: PrismaService) {}
+  async createChannel(req) {
+    const { userId } = req.user;
+    const { roomId } = req.params;
+    try {
+      // Check if user is admin
+      const isAdmin = await this.prisma.chatroomMember.findFirst({
+        where: { userId: +userId, id: +roomId, isAdmin: true },
+      });
+      if (!isAdmin) {
+        throw new UnauthorizedException(
+          "You're not an admin of this workspace.",
+        );
+      }
+      //
+      const channel = await this.prisma.channel.create({
+        data: { name: req.body.name, chatroomId: +roomId },
+      });
+      // Create CH member
+      await this.prisma.channelMember.create({
+        data: { channelId: channel.id, userId: +userId },
+      });
+
+      const res = await this.prisma.chatroom.findFirst({
+        where: { Channels: { some: { id: channel.id } } },
+        include: { Channels: { where: { id: channel.id } } },
+      });
+      return res;
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   findAll() {
@@ -14,10 +42,6 @@ export class ChannelsService {
 
   findOne(id: number) {
     return `This action returns a #${id} channel`;
-  }
-
-  update(id: number, updateChannelDto: UpdateChannelDto) {
-    return `This action updates a #${id} channel`;
   }
 
   remove(id: number) {
