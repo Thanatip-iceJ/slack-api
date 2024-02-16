@@ -10,6 +10,7 @@ import { User, Prisma } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import * as fs from 'fs/promises';
+import { ChatroomsService } from 'src/chatrooms/chatrooms.service';
 
 @Injectable()
 export class AuthService {
@@ -17,6 +18,7 @@ export class AuthService {
     private prisma: PrismaService,
     private jwt: JwtService,
     private cloudinary: CloudinaryService,
+    private chatRoomService: ChatroomsService,
   ) {}
 
   async createUser(data: Prisma.UserCreateInput): Promise<User> {
@@ -24,10 +26,11 @@ export class AuthService {
       const { password } = data;
       const hashedPw = await bcrypt.hash(password, 12);
       data.password = hashedPw;
-      const res = await this.prisma.user.create({
+      const user = await this.prisma.user.create({
         data: data,
       });
-      return res;
+      this.chatRoomService.initNewUser(user);
+      return user;
     } catch (err) {
       console.log(err);
       throw new InternalServerErrorException();
@@ -60,13 +63,16 @@ export class AuthService {
       throw new InternalServerErrorException();
     }
   }
-  async getAuth(req): Promise<User> {
+  async getAuth(req) {
     try {
+      const { userId } = req.user;
       const user = await this.prisma.user.findUnique({
-        where: { id: req.user.userId },
+        where: { id: userId },
       });
       delete user.password;
-      return user;
+      const rooms = await this.chatRoomService.getAllRooms(userId);
+      const res = { user, rooms };
+      return res;
     } catch (err) {
       console.log(err);
       throw new InternalServerErrorException();

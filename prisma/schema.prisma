@@ -25,33 +25,39 @@ model User {
 }
 
 model Chatroom {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique @db.VarChar(30)
-  createdAt DateTime  @default(now())
-  Channels  Channel[]
+  id             Int              @id @default(autoincrement())
+  name           String           @unique @db.VarChar(30)
+  createdAt      DateTime         @default(now())
+  Channels       Channel[]
+  ChatroomMember ChatroomMember[]
 }
 
 model Channel {
   id              Int              @id @default(autoincrement())
   name            String           @db.VarChar(30)
-  topic           String           @db.VarChar(30)
+  topic           String?          @db.VarChar(30)
   createdAt       DateTime         @default(now())
   chatRoom        Chatroom         @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
   chatroomId      Int
   ChannelMessages ChannelMessage[]
+  ChannelMember   ChannelMember[]
 }
 
 model ChatroomMember {
-  id      Int     @id @default(autoincrement())
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId  Int
-  isAdmin Boolean @default(false)
+  id         Int      @id @default(autoincrement())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     Int
+  isAdmin    Boolean  @default(false)
+  chatRoom   Chatroom @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
+  chatroomId Int
 }
 
 model ChannelMember {
-  id     Int  @id @default(autoincrement())
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId Int
+  id        Int     @id @default(autoincrement())
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  channel   Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  channelId Int
 }
 
 model ChannelMessage {

@@ -6,6 +6,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { JWT_SECRET_KEY } from 'contrants';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { MulterModule } from '@nestjs/platform-express';
+import { ChatroomsService } from 'src/chatrooms/chatrooms.service';
 
 @Module({
   imports: [
@@ -19,6 +20,6 @@ import { MulterModule } from '@nestjs/platform-express';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, PrismaService, CloudinaryService],
+  providers: [AuthService, PrismaService, CloudinaryService, ChatroomsService],
 })
 export class AuthModule {}
