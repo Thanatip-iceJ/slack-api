@@ -1,4 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
@@ -29,6 +30,26 @@ export class ChannelsService {
       const res = await this.prisma.chatroom.findFirst({
         where: { Channels: { some: { id: channel.id } } },
         include: { Channels: { where: { id: channel.id } } },
+      });
+      return res;
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  async addTopic(req): Promise<Prisma.ChannelUpdateInput> {
+    try {
+      const { body } = req;
+      const { channelId } = req.params;
+      console.log(body);
+      console.log(channelId);
+      const found = await this.prisma.channel.findUnique({
+        where: { id: +channelId },
+      });
+      Object.assign(found, body);
+      const res = await this.prisma.channel.update({
+        data: found,
+        where: { id: +channelId },
       });
       return res;
     } catch (err) {

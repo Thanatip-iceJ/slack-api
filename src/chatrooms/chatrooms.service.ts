@@ -109,8 +109,18 @@ export class ChatroomsService {
           createdAt: 'asc',
         },
       });
-      console.log(res);
       return res;
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  async clearHistory(channelId: number): Promise<string> {
+    try {
+      await this.prisma.channelMessage.deleteMany({
+        where: { channelId: channelId },
+      });
+      return 'Message history has been cleared.';
     } catch (err) {
       console.log(err);
     }

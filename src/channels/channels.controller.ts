@@ -6,6 +6,7 @@ import {
   Delete,
   Req,
   UseGuards,
+  Patch,
 } from '@nestjs/common';
 import { ChannelsService } from './channels.service';
 import { ApiTags } from '@nestjs/swagger';
@@ -20,6 +21,12 @@ export class ChannelsController {
   @Post(':roomId')
   create(@Req() req) {
     return this.channelsService.createChannel(req);
+  }
+
+  @UseGuards(AuthGuard)
+  @Patch(':channelId/topic')
+  addTopic(@Req() req) {
+    return this.channelsService.addTopic(req);
   }
 
   @Get()

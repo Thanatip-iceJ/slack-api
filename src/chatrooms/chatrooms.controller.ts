@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, UseGuards, Req, Delete } from '@nestjs/common';
 import { ChatroomsService } from './chatrooms.service';
 // import { CreateChatroomDto } from './dto/create-chatroom.dto';
 // import { UpdateChatroomDto } from './dto/update-chatroom.dto';
@@ -26,5 +26,13 @@ export class ChatroomsController {
   @Get('messages/:channelId')
   async getChannelMessages(@Req() req) {
     return this.chatroomsService.findAllChannelMsg(req);
+  }
+
+  @UseGuards(AuthGuard)
+  @Delete('messages/:channelId')
+  async clearChatHistory(@Req() req) {
+    const { channelId } = req.params;
+    console.log(channelId);
+    return this.chatroomsService.clearHistory(+channelId);
   }
 }
